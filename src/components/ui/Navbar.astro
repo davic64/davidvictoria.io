@@ -3,14 +3,14 @@ import { siteConfig } from "../../config/siteConfig";
 ---
 
 <header
-    class="border-b border-b-slate-200 py-2 flex items-center justify-center"
+    class="bg-white border-b border-b-slate-200 py-4 flex items-center justify-center fixed w-full z-20"
 >
     <nav class="w-full max-w-4/5 flex items-center justify-between">
         <figure class="font-bold text-xl">David Victoria</figure>
         <ul class="flex items-center gap-10">
             {
                 siteConfig.itemsNav.map((item) => (
-                    <li class="text-slate-500 hover:text-green-500 transition-colors duration-300">
+                    <li class="text-neutral-400 hover:text-black transition-colors duration-300">
                         <a href={item.href}>{item.label}</a>
                     </li>
                 ))

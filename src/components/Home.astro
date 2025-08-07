@@ -1,1 +1,31 @@
-<div>Hola David</div>
+---
+import BlogCard from "./ui/BlogCard.astro";
+import { dummyPosts } from "../data/dummyPosts";
+
+const posts = dummyPosts;
+---
+
+<div class="space-y-10">
+    <div class="space-y-4">
+        <h2 class="font-bold text-4xl">El Camino del Desarrollador.</h2>
+        <p class="text-neutral-500">
+            Este blog es un espacio donde comparto mis aprendizajes<br />y
+            experiencias en el mundo del software.
+        </p>
+    </div>
+    <div class="grid grid-cols-4 gap-6">
+        {
+            Array.isArray(posts) && posts.length > 0 && (
+                <>
+                    {posts.map((post, idx) => {
+                        const cyclePosition = idx % 6;
+                        const isColSpan2 =
+                            cyclePosition === 0 || cyclePosition === 5;
+                        const className = isColSpan2 ? "col-span-2" : "";
+                        return <BlogCard {...post} className={className} />;
+                    })}
+                </>
+            )
+        }
+    </div>
+</div>

@@ -1,0 +1,27 @@
+---
+import type { Post } from "../../data/dummyPosts";
+
+interface Props extends Post {
+    className?: string;
+}
+
+const { title, category, description, coverImage, className } = Astro.props;
+---
+
+<div
+    class={`group bg-neutral-300 h-76 rounded-xl relative overflow-hidden cursor-pointer ${className}`}
+>
+    <div class="h-full w-full absolute">
+        <img
+            src={coverImage}
+            alt={title}
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+        />
+    </div>
+    <div class="p-8 space-y-2 text-white absolute">
+        <p class="text-xs font-light">{category}</p>
+        <p class="font-bold text-3xl w-full max-w-sm">
+            {title}
+        </p>
+    </div>
+</div>
