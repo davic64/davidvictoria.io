@@ -1,22 +1,32 @@
 ---
-import type { Post } from "../../data/dummyPosts";
+import { Image } from 'astro:assets';
 
-interface Props extends Post {
+interface Props {
+    title: string;
+    category: string;
+    mainImage: string | null;
+    slug: string;
+    date: string;
     className?: string;
 }
 
-const { title, category, description, coverImage, className } = Astro.props;
+const { title, category, mainImage, slug, className } = Astro.props;
 ---
 
-<div
+<a
+href={`/post/${slug}`}
     class={`group bg-neutral-300 h-76 rounded-xl relative overflow-hidden cursor-pointer ${className}`}
 >
     <div class="h-full w-full absolute">
-        <img
-            src={coverImage}
-            alt={title}
-            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-        />
+        {mainImage && (
+            <Image
+                src={mainImage}
+                alt={title}
+                width={400}
+                height={300}
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            />
+        )}
     </div>
     <div class="p-8 space-y-2 text-white absolute">
         <p class="text-xs font-light">{category}</p>
@@ -24,4 +34,4 @@ const { title, category, description, coverImage, className } = Astro.props;
             {title}
         </p>
     </div>
-</div>
+</a>

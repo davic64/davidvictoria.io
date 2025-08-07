@@ -1,8 +1,30 @@
 ---
 import BlogCard from "./ui/BlogCard.astro";
-import { dummyPosts } from "../data/dummyPosts";
 
-const posts = dummyPosts;
+import { client } from "../lib/sanity";
+import ImageUrlBuilder  from "@sanity/image-url";
+
+const builder = ImageUrlBuilder(client);
+function urlFor(source: any) {
+  return builder.image(source)
+}
+
+const query = `
+  *[_type == "post"] | order(date desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    "category": category->title,
+    date,
+    mainImage {
+      asset -> {
+        url
+      }
+    }
+  }
+  `
+
+const posts = await client.fetch(query)
 ---
 
 <div class="space-y-10">
@@ -22,7 +44,8 @@ const posts = dummyPosts;
                         const isColSpan2 =
                             cyclePosition === 0 || cyclePosition === 5;
                         const className = isColSpan2 ? "col-span-2" : "";
-                        return <BlogCard {...post} className={className} />;
+                        return <BlogCard title={post.title} slug={post.slug} category={post.category}
+                                    date={post.date} className={className} mainImage={post.mainImage ? urlFor(post.mainImage).url() : null} />;
                     })}
                 </>
             )
