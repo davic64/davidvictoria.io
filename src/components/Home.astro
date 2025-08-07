@@ -27,15 +27,15 @@ const query = `
 const posts = await client.fetch(query)
 ---
 
-<div class="space-y-10">
+<div class="space-y-10 px-4 sm:px-6 lg:px-8">
     <div class="space-y-4">
-        <h2 class="font-bold text-4xl">El Camino del Desarrollador.</h2>
-        <p class="text-neutral-500">
-            Este blog es un espacio donde comparto mis aprendizajes<br />y
+        <h2 class="font-bold text-2xl sm:text-3xl md:text-4xl">El Camino del Desarrollador.</h2>
+        <p class="text-neutral-500 text-sm sm:text-base">
+            Este blog es un espacio donde comparto mis aprendizajes<br class="hidden sm:block" />y
             experiencias en el mundo del software.
         </p>
     </div>
-    <div class="grid grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {
             Array.isArray(posts) && posts.length > 0 && (
                 <>
@@ -43,7 +43,7 @@ const posts = await client.fetch(query)
                         const cyclePosition = idx % 6;
                         const isColSpan2 =
                             cyclePosition === 0 || cyclePosition === 5;
-                        const className = isColSpan2 ? "col-span-2" : "";
+                        const className = isColSpan2 ? "sm:col-span-2 lg:col-span-2" : "";
                         return <BlogCard title={post.title} slug={post.slug} category={post.category}
                                     date={post.date} className={className} mainImage={post.mainImage ? urlFor(post.mainImage).url() : null} />;
                     })}
