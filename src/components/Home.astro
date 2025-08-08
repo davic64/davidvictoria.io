@@ -1,30 +1,8 @@
 ---
 import BlogCard from "./ui/BlogCard.astro";
+import { mockPosts } from "../data/mockPosts";
 
-import { client } from "../lib/sanity";
-import ImageUrlBuilder  from "@sanity/image-url";
-
-const builder = ImageUrlBuilder(client);
-function urlFor(source: any) {
-  return builder.image(source)
-}
-
-const query = `
-  *[_type == "post"] | order(date desc) {
-    _id,
-    title,
-    "slug": slug.current,
-    "category": category->title,
-    date,
-    mainImage {
-      asset -> {
-        url
-      }
-    }
-  }
-  `
-
-const posts = await client.fetch(query)
+const posts = mockPosts;
 ---
 
 <div class="space-y-10 px-4 sm:px-6 lg:px-8">
@@ -45,7 +23,7 @@ const posts = await client.fetch(query)
                             cyclePosition === 0 || cyclePosition === 5;
                         const className = isColSpan2 ? "sm:col-span-2 lg:col-span-2" : "";
                         return <BlogCard title={post.title} slug={post.slug} category={post.category}
-                                    date={post.date} className={className} mainImage={post.mainImage ? urlFor(post.mainImage).url() : null} />;
+                                    date={post.date} className={className} mainImage={post.mainImage || null} />;
                     })}
                 </>
             )

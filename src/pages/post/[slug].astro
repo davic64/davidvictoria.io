@@ -1,47 +1,22 @@
 ---
 import { Image } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
-import { client } from '../../lib/sanity';
-import { toHTML } from '@portabletext/to-html';
-import ImageUrlBuilder from "@sanity/image-url";
+import { mockPosts, type Post } from '../../data/mockPosts';
 
 export async function getStaticPaths() {
-  const slugs = await client.fetch(`*[_type == "post"]{"slug": slug.current}`);
-  return slugs.map((slug: { slug: string }) => ({ params: { slug: slug.slug } }));
-}
-
-const builder = ImageUrlBuilder(client);
-function urlFor(source: any) {
-  return builder.image(source);
+  return mockPosts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post }
+  }));
 }
 
 const { slug } = Astro.params;
-const post = await client.fetch(`
-  *[_type == "post" && slug.current == $slug][0] {
-    title,
-    date,
-    readTime,
-    "category": category->title,
-    body,
-    mainImage {
-      asset -> {
-        url
-      }
-    }
-  }
-`, { slug });
+const { post }: { post: Post } = Astro.props;
 
 if (!post) {
   return Astro.redirect('/404');
 }
 
-const htmlBody = toHTML(post.body, {
-  components: {
-    block: {
-        normal: ({children}) => `<p class="mb-6">${children}</p>`
-    }
-  }
-});
 const formattedDate = new Date(post.date).toLocaleDateString('es-ES', {
   month: 'long',
   day: 'numeric',
@@ -83,7 +58,7 @@ const formattedDate = new Date(post.date).toLocaleDateString('es-ES', {
       <figure class="mb-6 sm:mb-8 md:mb-12">
         <div class="aspect-video max-sm:rounded-xl rounded-2xl overflow-hidden shadow-lg">
           <Image
-            src={urlFor(post.mainImage).url()}
+            src={post.mainImage}
             alt={`Imagen de portada para ${post.title}`}
             width={1200}
             height={630}
@@ -97,7 +72,7 @@ const formattedDate = new Date(post.date).toLocaleDateString('es-ES', {
 
     <!-- Article Content -->
     <div class="prose prose-sm sm:prose-base lg:prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900 prose-code:text-pink-600 prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-img:rounded-lg prose-img:shadow-md">
-      <div set:html={htmlBody} />
+      <div set:html={post.body} />
     </div>
 
     <!-- Back to Blog Link -->
