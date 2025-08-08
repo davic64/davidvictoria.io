@@ -1,3 +1,9 @@
-// ./src/env.d.ts
 /// <reference types="astro/client" />
-/// <reference types="@sanity/astro/module" />
+
+interface ImportMetaEnv {
+  readonly HASHNODE_PUBLICATION_HOST: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

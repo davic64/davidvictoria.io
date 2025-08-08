@@ -1,8 +1,8 @@
 ---
 import BlogCard from "./ui/BlogCard.astro";
-import { mockPosts } from "../data/mockPosts";
+import { getAllPosts, HASHNODE_CONFIG } from "../lib/hashnode";
 
-const posts = mockPosts;
+const { posts } = await getAllPosts(HASHNODE_CONFIG.host, 10);
 ---
 
 <div class="space-y-10 px-4 sm:px-6 lg:px-8">
