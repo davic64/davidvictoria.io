@@ -2,18 +2,9 @@
 import { Image } from "astro:assets";
 import Layout from "../../layouts/Layout.astro";
 import {
-    getPostSlugs,
     getPostBySlug,
     HASHNODE_CONFIG,
 } from "../../lib/hashnode";
-export async function getStaticPaths() {
-    // Solo obtenemos los slugs - mucho más eficiente
-    const slugs = await getPostSlugs(HASHNODE_CONFIG.host, 50);
-
-    return slugs.map((slug) => ({
-        params: { slug },
-    }));
-}
 
 const { slug } = Astro.params;
 const post = await getPostBySlug(HASHNODE_CONFIG.host, slug!);
