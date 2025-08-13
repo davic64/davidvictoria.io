@@ -1,10 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import Layout from "../../layouts/Layout.astro";
-import {
-    getPostBySlug,
-    HASHNODE_CONFIG,
-} from "../../lib/hashnode";
+import { getPostBySlug, HASHNODE_CONFIG } from "../../lib/hashnode";
 
 const { slug } = Astro.params;
 const post = await getPostBySlug(HASHNODE_CONFIG.host, slug!);
@@ -15,8 +12,14 @@ if (!post) {
 
 // Procesamos el HTML de Hashnode para añadir estilos como lo haríamos con Portable Text
 const htmlBody = post.body
-    .replace(/<p>/g, '<p class="mb-6">')
-    .replace(/<h1>/g, '<h1 class="text-3xl font-bold mt-8 mb-4">')
+    .replace(
+        /<p>/g,
+        '<p class="mb-6 font-light text-base md:text-lg text-neutral-600">',
+    )
+    .replace(
+        /<h1([^>]*)>/g,
+        '<h1$1 class="text-xl md:text-4xl font-bold mt-8 mb-4 text-neutral-900">',
+    )
     .replace(/<h2>/g, '<h2 class="text-2xl font-bold mt-6 mb-3">')
     .replace(/<h3>/g, '<h3 class="text-xl font-semibold mt-5 mb-2">')
     .replace(/<ul>/g, '<ul class="list-disc list-inside mb-4 space-y-1">')
@@ -111,10 +114,8 @@ const formattedDate = new Date(post.date).toLocaleDateString("es-ES", {
         }
 
         <!-- Article Content -->
-        <div
-            class="prose prose-sm sm:prose-base lg:prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900 prose-code:text-pink-600 prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-img:rounded-lg prose-img:shadow-md"
-        >
-            <div class="text-base md:text-xl" set:html={htmlBody} />
+        <div>
+            <div set:html={htmlBody} />
         </div>
 
         <!-- Back to Blog Link -->
