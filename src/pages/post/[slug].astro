@@ -10,7 +10,7 @@ if (!post) {
     return Astro.redirect("/404");
 }
 
-// Procesamos el HTML de Hashnode para añadir estilos como lo haríamos con Portable Text
+// Procesamos el HTML de Hashnode para añadir estilos - SIN tocar los bloques de código
 const htmlBody = post.body
     .replace(
         /<p>/g,

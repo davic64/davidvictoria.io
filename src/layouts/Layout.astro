@@ -52,6 +52,49 @@ const imageUrl = image?.startsWith('http') ? image : new URL(image, siteUrl).hre
         <!-- Additional SEO -->
         <meta name="robots" content="index, follow" />
         <meta name="author" content="David Victoria" />
+        
+        <!-- Prism.js theme -->
+        <link rel="stylesheet" href="/prism-catppuccin-mocha.css" />
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Add copy buttons to all code blocks
+                document.querySelectorAll('pre').forEach(function(pre) {
+                    const button = document.createElement('button');
+                    button.className = 'copy-button';
+                    button.textContent = 'Copy';
+                    button.setAttribute('aria-label', 'Copy code to clipboard');
+                    
+                    button.addEventListener('click', async function() {
+                        const code = pre.querySelector('code');
+                        if (code) {
+                            try {
+                                // Extract text content, removing HTML tags
+                                const text = code.textContent || code.innerText;
+                                await navigator.clipboard.writeText(text);
+                                
+                                // Visual feedback
+                                button.textContent = 'Copied!';
+                                button.classList.add('copied');
+                                
+                                setTimeout(function() {
+                                    button.textContent = 'Copy';
+                                    button.classList.remove('copied');
+                                }, 2000);
+                            } catch (err) {
+                                console.error('Failed to copy text: ', err);
+                                button.textContent = 'Error';
+                                setTimeout(function() {
+                                    button.textContent = 'Copy';
+                                }, 2000);
+                            }
+                        }
+                    });
+                    
+                    pre.appendChild(button);
+                });
+            });
+        </script>
     </head>
     <body>
         <Navbar />
