@@ -27,6 +27,11 @@ const htmlBody = post.body
     .replace(
         /<blockquote>/g,
         '<blockquote class="border-l-4 border-blue-500 pl-4 py-2 mb-4 italic bg-blue-50">',
+    )
+    .replace(/<a([^>]*)>/g, '<a$1 class="text-blue-500 hover:underline">')
+    .replace(
+        /<img([^>]*?)class="([^"]*)"([^>]*)>/g,
+        '<img$1class=" rounded-xl"$3>',
     );
 
 const formattedDate = new Date(post.date).toLocaleDateString("es-ES", {
