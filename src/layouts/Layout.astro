@@ -57,52 +57,83 @@ const imageUrl = image?.startsWith('http') ? image : new URL(image, siteUrl).hre
         <link rel="stylesheet" href="/prism-catppuccin-mocha.css" />
         
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Wrap all code blocks in rounded containers and add copy buttons
-                document.querySelectorAll('pre').forEach(function(pre) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'code-block-wrapper';
-                    
-                    // Create copy button
+            (() => {
+                'use strict';
+                
+                // Configuration
+                const COPY_TIMEOUT = 2000;
+                const BUTTON_TEXT = {
+                    default: 'Copy',
+                    success: 'Copied!',
+                    error: 'Error'
+                };
+                
+                // Create copy button factory
+                const createCopyButton = (codeElement) => {
                     const button = document.createElement('button');
                     button.className = 'copy-button';
-                    button.textContent = 'Copy';
+                    button.textContent = BUTTON_TEXT.default;
                     button.setAttribute('aria-label', 'Copy code to clipboard');
                     
-                    button.addEventListener('click', async function() {
-                        const code = pre.querySelector('code');
-                        if (code) {
-                            try {
-                                // Extract text content, removing HTML tags
-                                const text = code.textContent || code.innerText;
-                                await navigator.clipboard.writeText(text);
-                                
-                                // Visual feedback
-                                button.textContent = 'Copied!';
-                                button.classList.add('copied');
-                                
-                                setTimeout(function() {
-                                    button.textContent = 'Copy';
-                                    button.classList.remove('copied');
-                                }, 2000);
-                            } catch (err) {
-                                console.error('Failed to copy text: ', err);
-                                button.textContent = 'Error';
-                                setTimeout(function() {
-                                    button.textContent = 'Copy';
-                                }, 2000);
-                            }
-                        }
-                    });
+                    let timeoutId = null;
                     
-                    // Insert wrapper before pre
-                    pre.parentNode.insertBefore(wrapper, pre);
-                    // Move pre inside wrapper
-                    wrapper.appendChild(pre);
-                    // Add button to wrapper
-                    wrapper.appendChild(button);
-                });
-            });
+                    const resetButton = () => {
+                        button.textContent = BUTTON_TEXT.default;
+                        button.classList.remove('copied');
+                        timeoutId = null;
+                    };
+                    
+                    const handleCopy = async () => {
+                        // Prevent multiple rapid clicks
+                        if (timeoutId) return;
+                        
+                        try {
+                            const text = codeElement.textContent || codeElement.innerText;
+                            await navigator.clipboard.writeText(text);
+                            
+                            button.textContent = BUTTON_TEXT.success;
+                            button.classList.add('copied');
+                            
+                            timeoutId = setTimeout(resetButton, COPY_TIMEOUT);
+                        } catch (err) {
+                            console.warn('Copy failed:', err.message);
+                            button.textContent = BUTTON_TEXT.error;
+                            timeoutId = setTimeout(resetButton, COPY_TIMEOUT);
+                        }
+                    };
+                    
+                    button.addEventListener('click', handleCopy);
+                    return button;
+                };
+                
+                // Initialize when DOM is ready
+                const initCodeBlocks = () => {
+                    const preElements = document.querySelectorAll('pre');
+                    
+                    preElements.forEach(pre => {
+                        const codeElement = pre.querySelector('code');
+                        if (!codeElement) return;
+                        
+                        // Create wrapper
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'code-block-wrapper';
+                        
+                        // Create button
+                        const button = createCopyButton(codeElement);
+                        
+                        // Insert wrapper and reorganize DOM
+                        pre.parentNode.insertBefore(wrapper, pre);
+                        wrapper.append(pre, button);
+                    });
+                };
+                
+                // Start initialization
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initCodeBlocks);
+                } else {
+                    initCodeBlocks();
+                }
+            })();
         </script>
         
     </head>
