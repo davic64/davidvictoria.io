@@ -58,8 +58,12 @@ const imageUrl = image?.startsWith('http') ? image : new URL(image, siteUrl).hre
         
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Add copy buttons to all code blocks
+                // Wrap all code blocks in rounded containers and add copy buttons
                 document.querySelectorAll('pre').forEach(function(pre) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'code-block-wrapper';
+                    
+                    // Create copy button
                     const button = document.createElement('button');
                     button.className = 'copy-button';
                     button.textContent = 'Copy';
@@ -91,10 +95,16 @@ const imageUrl = image?.startsWith('http') ? image : new URL(image, siteUrl).hre
                         }
                     });
                     
-                    pre.appendChild(button);
+                    // Insert wrapper before pre
+                    pre.parentNode.insertBefore(wrapper, pre);
+                    // Move pre inside wrapper
+                    wrapper.appendChild(pre);
+                    // Add button to wrapper
+                    wrapper.appendChild(button);
                 });
             });
         </script>
+        
     </head>
     <body>
         <Navbar />

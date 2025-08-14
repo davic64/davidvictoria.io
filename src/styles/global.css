@@ -1,13 +1,11 @@
 @import "tailwindcss";
 
-/* Catppuccin Mocha theme for code blocks */
-pre {
-  @apply my-6 rounded-lg overflow-x-auto;
-  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace !important;
-  background: #181825 !important;
-  padding: 1.5rem !important;
-  color: #cdd6f4 !important;
-  position: relative !important;
+/* Wrapper for code blocks to maintain rounded corners */
+.code-block-wrapper {
+  @apply my-6 overflow-hidden;
+  background: #181825;
+  border-radius: 1rem;
+  position: relative;
 }
 
 /* Copy button */
@@ -37,9 +35,23 @@ pre {
   color: #181825;
 }
 
-pre:hover .copy-button {
+.code-block-wrapper:hover .copy-button {
   opacity: 1;
 }
+
+/* Catppuccin Mocha theme for code blocks */
+pre {
+  @apply overflow-x-auto;
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace !important;
+  background: #181825 !important;
+  padding: 1.5rem !important;
+  color: #cdd6f4 !important;
+  position: relative !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+
 
 pre code {
   background: transparent !important;
