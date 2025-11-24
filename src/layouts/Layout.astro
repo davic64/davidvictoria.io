@@ -1,5 +1,6 @@
 ---
 import GlowBackground from "../components/ui/GlowBackground.astro";
+import Navbar from "../components/ui/Navbar.astro";
 ---
 
 <!doctype html>
@@ -13,6 +14,9 @@ import GlowBackground from "../components/ui/GlowBackground.astro";
   </head>
   <body>
     <GlowBackground />
-    <slot />
+    <Navbar />
+    <div class="max-w-7xl mx-auto px-8">
+      <slot />
+    </div>
   </body>
 </html>
