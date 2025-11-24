@@ -1,0 +1,150 @@
+---
+import { Menu, X } from "@lucide/astro";
+---
+
+<header class="sticky top-0 z-50 bg-black/50 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
+    <span class="font-semibold tracking-tight text-lg relative z-50">
+      DavidVictoria<span class="text-yellow-400">.io</span>
+    </span>
+
+    <!-- Desktop Menu -->
+    <nav class="hidden md:block">
+      <ul class="flex space-x-6">
+        <li>
+          <a
+            href="/"
+            class="hover:text-yellow-400 font-medium text-sm transition-colors duration-200"
+            >Inicio</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://www.entkore.com/"
+            class="hover:text-yellow-400 font-medium text-sm transition-colors duration-200"
+            >Entkore</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://github.com/davic64"
+            class="hover:text-yellow-400 font-medium text-sm transition-colors duration-200"
+            >Github</a
+          >
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Mobile Menu Button -->
+    <button
+      id="menu-toggle"
+      class="md:hidden text-white hover:text-yellow-400 transition-colors relative z-50"
+      aria-label="Toggle menu"
+    >
+      <Menu id="menu-icon" class="w-6 h-6 transition-transform duration-300" />
+      <X
+        id="close-icon"
+        class="w-6 h-6 hidden transition-transform duration-300 rotate-90"
+      />
+    </button>
+  </div>
+</header>
+
+<!-- Mobile Menu Overlay -->
+<div
+  id="mobile-menu"
+  class="fixed inset-0 bg-black z-40 flex flex-col items-center justify-start opacity-0 pointer-events-none transition-opacity duration-300 pt-32"
+>
+  <nav>
+    <ul class="flex flex-col items-center space-y-8 text-center">
+      <li
+        class="mobile-item opacity-0 translate-y-4 transition-all duration-500 ease-out"
+      >
+        <a
+          href="/"
+          class="mobile-link text-2xl font-medium hover:text-yellow-400 transition-colors duration-200"
+          >Inicio</a
+        >
+      </li>
+      <li
+        class="mobile-item opacity-0 translate-y-4 transition-all duration-500 ease-out delay-100"
+      >
+        <a
+          href="https://www.entkore.com/"
+          class="mobile-link text-2xl font-medium hover:text-yellow-400 transition-colors duration-200"
+          >Entkore</a
+        >
+      </li>
+      <li
+        class="mobile-item opacity-0 translate-y-4 transition-all duration-500 ease-out delay-200"
+      >
+        <a
+          href="https://github.com/davic64"
+          class="mobile-link text-2xl font-medium hover:text-yellow-400 transition-colors duration-200"
+          >Github</a
+        >
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<script>
+  const menuToggle = document.getElementById("menu-toggle");
+  const mobileMenu = document.getElementById("mobile-menu");
+  const menuIcon = document.getElementById("menu-icon");
+  const closeIcon = document.getElementById("close-icon");
+  const mobileLinks = document.querySelectorAll(".mobile-link");
+  const mobileItems = document.querySelectorAll(".mobile-item");
+  const body = document.body;
+
+  let isMenuOpen = false;
+
+  function toggleMenu() {
+    isMenuOpen = !isMenuOpen;
+
+    if (isMenuOpen) {
+      // Open menu
+      mobileMenu?.classList.remove("opacity-0", "pointer-events-none");
+      mobileMenu?.classList.add("opacity-100", "pointer-events-auto");
+
+      // Animate items in
+      mobileItems.forEach((item) => {
+        item.classList.remove("opacity-0", "translate-y-4");
+      });
+
+      // Icon animation
+      menuIcon?.classList.add("hidden");
+      closeIcon?.classList.remove("hidden", "rotate-90");
+      closeIcon?.classList.add("rotate-0");
+
+      // Lock scroll
+      body.style.overflow = "hidden";
+    } else {
+      // Close menu
+      mobileMenu?.classList.remove("opacity-100", "pointer-events-auto");
+      mobileMenu?.classList.add("opacity-0", "pointer-events-none");
+
+      // Reset items
+      mobileItems.forEach((item) => {
+        item.classList.add("opacity-0", "translate-y-4");
+      });
+
+      // Icon animation
+      closeIcon?.classList.add("hidden", "rotate-90");
+      closeIcon?.classList.remove("rotate-0");
+      menuIcon?.classList.remove("hidden");
+
+      // Unlock scroll
+      body.style.overflow = "";
+    }
+  }
+
+  menuToggle?.addEventListener("click", toggleMenu);
+
+  // Close menu when clicking a link
+  mobileLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      if (isMenuOpen) toggleMenu();
+    });
+  });
+</script>
