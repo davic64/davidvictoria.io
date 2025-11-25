@@ -1,9 +1,18 @@
 ---
 import FilterTabs from "./ui/FilterTabs.astro";
 import FeaturedPost from "./ui/FeaturedPost.astro";
+import PostCard from "./ui/PostCard.astro";
 ---
 
 <section class="space-y-20 pb-20">
   <FilterTabs />
   <FeaturedPost />
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <PostCard />
+    <PostCard />
+    <PostCard />
+    <PostCard />
+    <PostCard />
+    <PostCard />
+  </div>
 </section>

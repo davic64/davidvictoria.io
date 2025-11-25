@@ -1,5 +1,24 @@
+---
+interface Props {
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
+}
+
+const { size = "md" } = Astro.props;
+
+const sizeClasses = {
+  xs: "w-6 h-6 text-[8px]",
+  sm: "w-8 h-8 text-[10px]",
+  md: "w-10 h-10 text-xs",
+  lg: "w-12 h-12 text-sm",
+  xl: "w-16 h-16 text-base",
+};
+---
+
 <div
-  class="w-10 h-10 rounded-full bg-linear-to-tr from-yellow-500 to-orange-500 flex items-center justify-center text-xs text-black font-bold"
+  class:list={[
+    "rounded-full bg-linear-to-tr from-yellow-500 to-orange-500 flex items-center justify-center text-black font-bold",
+    sizeClasses[size],
+  ]}
 >
   DV
 </div>
