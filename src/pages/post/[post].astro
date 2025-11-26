@@ -1,0 +1,80 @@
+---
+import { ArrowLeft, Calendar, Clock } from "@lucide/astro";
+import Layout from "../../layouts/Layout.astro";
+import Avatar from "../../components/ui/Avatar.astro";
+import { Image } from "astro:assets";
+
+export function getStaticPaths() {
+  const posts = [
+    {
+      slug: "hello-world",
+      title: "Hello World",
+      content: "This is the first post. Welcome to my new blog!",
+    },
+  ];
+
+  return posts.map((post) => ({
+    params: { post: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+---
+
+<Layout>
+  <div class="max-w-4xl mx-auto py-10 space-y-8">
+    <div>
+      <div>
+        <a href="/" class="inline-block">
+          <button
+            class="flex items-center gap-3 text-gray-500 hover:text-white transition-colors group text-sm font-medium cursor-pointer"
+          >
+            <div
+              class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-colors"
+            >
+              <ArrowLeft size={14} />
+            </div>
+            Regresar al blog
+          </button></a
+        >
+      </div>
+    </div>
+    <article class="px-4 space-y-6">
+      <h1 class="text-4xl md:text-6xl font-bold text-white tracking-tight">
+        {post.title}
+      </h1>
+      <div class="flex items-center gap-4 border-b border-white/5 pb-8 mb-8">
+        <div class="flex items-center gap-2">
+          <Avatar size="sm" />
+          <span class="text-sm">David Victoria</span>
+        </div>
+        <div class="hidden md:block w-px h-8 bg-white/5"></div>
+        <div class="flex items-center gap-4 text-gray-500 text-xs">
+          <div class="flex items-center gap-2">
+            <Calendar size={14} />
+            <span>24-11-2025</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <Clock size={14} />
+            <span>6 min</span>
+          </div>
+        </div>
+      </div>
+      <Image
+        src="https://images.unsplash.com/photo-1763827657709-b1bbc3c4945b?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+        alt="Post"
+        class="w-full h-96 object-cover rounded-lg"
+        width={1200}
+        height={600}
+        loading="lazy"
+        fit="inside"
+        quality={80}
+        priority
+      />
+      <div class="mt-8">
+        <p>{post.content}</p>
+      </div>
+    </article>
+  </div></Layout
+>
