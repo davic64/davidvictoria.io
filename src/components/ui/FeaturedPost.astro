@@ -1,6 +1,7 @@
 ---
 import { CalendarIcon, ChevronRightIcon, ClockIcon } from "@lucide/astro";
 import Avatar from "./Avatar.astro";
+import Badge from "./Badge.astro";
 ---
 
 <div
@@ -11,6 +12,10 @@ import Avatar from "./Avatar.astro";
   >
   </div>
   <div class="relative h-64 md:h-full overflow-hidden">
+    <div class="flex gap-2 absolute top-4 left-4 z-10">
+      <Badge variant="glow" color="primary" text="Nuevo" />
+      <Badge text="General" />
+    </div>
     <img
       src="https://images.unsplash.com/photo-1763827657709-b1bbc3c4945b?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
       alt="imagen"

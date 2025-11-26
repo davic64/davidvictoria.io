@@ -1,0 +1,44 @@
+---
+interface Props {
+  variant?: "default" | "outline" | "glow";
+  color?: "default" | "primary";
+  class?: string;
+  text?: string;
+}
+
+const {
+  variant = "default",
+  color = "default",
+  class: className,
+  text = "",
+} = Astro.props;
+
+const styles = {
+  default: {
+    default: "bg-black/60 text-white border border-transparent",
+    primary: "bg-yellow-400 text-black border border-transparent",
+  },
+  outline: {
+    default: "border bg-black/40 border-black/20 text-white",
+    primary: "border bg-yellow-400/20 border-yellow-400/40 text-yellow-400",
+  },
+  glow: {
+    default:
+      "bg-white text-black border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.3)]",
+    primary:
+      "bg-yellow-400 text-black border border-yellow-400/50 shadow-[0_0_15px_rgba(250,204,21,0.4)]",
+  },
+};
+
+const selectedStyle = styles[variant][color];
+---
+
+<div
+  class:list={[
+    "uppercase text-xs font-semibold px-2 py-1 rounded-full tracking-wide",
+    selectedStyle,
+    className,
+  ]}
+>
+  {text}
+</div>
