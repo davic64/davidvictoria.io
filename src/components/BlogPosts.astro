@@ -12,7 +12,10 @@ const remainingPosts = posts.slice(1);
 <section class="space-y-20 pb-20">
   <FilterTabs />
 
-  <div id="featured-post-container">
+  <div
+    id="featured-post-container"
+    data-featured-slug={featuredPost?.slug || ""}
+  >
     {featuredPost && <FeaturedPost post={featuredPost} />}
   </div>
 
@@ -43,6 +46,8 @@ const remainingPosts = posts.slice(1);
   const featuredPostContainer = document.getElementById(
     "featured-post-container"
   );
+  const featuredPostSlug =
+    featuredPostContainer?.getAttribute("data-featured-slug") || "";
 
   let isLoading = false;
   let currentTag = "";
@@ -204,11 +209,12 @@ const remainingPosts = posts.slice(1);
         filteredPosts = newPosts.filter(
           (post: any) => !post.tags || post.tags.length === 0
         );
-      } else if (!tag && reset && filteredPosts.length > 0) {
+      } else if (!tag && reset) {
         // If we are in "Todos" (no tag) and resetting (first page),
-        // the first post is already shown in the featured section.
-        // Remove it to avoid duplication.
-        filteredPosts.shift();
+        // filter out the featured post to avoid duplication
+        filteredPosts = newPosts.filter(
+          (post: any) => post.slug !== featuredPostSlug
+        );
       }
 
       if (reset && postsGrid) {

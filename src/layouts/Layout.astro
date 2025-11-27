@@ -17,13 +17,17 @@ import "../styles/global.css";
     <title>David Victoria</title>
   </head>
   <body>
-    <Analytics />
-    <SpeedInsights />
-    <GlowBackground />
-    <Navbar />
-    <div class="max-w-7xl mx-auto px-8 flex-1 w-full">
-      <slot />
+    <div class="relative min-h-screen h-auto">
+      <GlowBackground />
+      <div class="relative z-10">
+        <Analytics />
+        <SpeedInsights />
+        <Navbar />
+        <div class="max-w-7xl mx-auto px-8 flex-1 w-full">
+          <slot />
+        </div>
+        <Footer />
+      </div>
     </div>
-    <Footer />
   </body>
 </html>
