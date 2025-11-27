@@ -12,7 +12,9 @@ const remainingPosts = posts.slice(1);
 <section class="space-y-20 pb-20">
   <FilterTabs />
 
-  {featuredPost && <FeaturedPost post={featuredPost} />}
+  <div id="featured-post-container">
+    {featuredPost && <FeaturedPost post={featuredPost} />}
+  </div>
 
   <div
     id="posts-grid"
@@ -38,8 +40,12 @@ const remainingPosts = posts.slice(1);
   const sentinel = document.getElementById("sentinel");
   const postsGrid = document.getElementById("posts-grid");
   const loadingIndicator = document.getElementById("loading-indicator");
+  const featuredPostContainer = document.getElementById(
+    "featured-post-container"
+  );
 
   let isLoading = false;
+  let currentTag = "";
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("es-ES", {
@@ -91,16 +97,50 @@ const remainingPosts = posts.slice(1);
     return card;
   };
 
-  const fetchMorePosts = async (cursor: string) => {
+  const createSkeletonCard = () => {
+    const card = document.createElement("div");
+    card.className =
+      "bg-card border border-white/5 rounded-2xl overflow-hidden flex flex-col h-full animate-pulse";
+    card.innerHTML = `
+      <div class="h-49 bg-white/5 w-full"></div>
+      <div class="p-6 flex-1 flex flex-col space-y-4">
+        <div class="h-6 bg-white/5 rounded w-3/4"></div>
+        <div class="space-y-2">
+          <div class="h-4 bg-white/5 rounded w-full"></div>
+          <div class="h-4 bg-white/5 rounded w-full"></div>
+          <div class="h-4 bg-white/5 rounded w-2/3"></div>
+        </div>
+        <div class="flex items-center justify-between pt-4 mt-auto border-t border-white/5">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-full bg-white/5"></div>
+            <div class="h-4 bg-white/5 rounded w-20"></div>
+          </div>
+          <div class="h-4 bg-white/5 rounded w-16"></div>
+        </div>
+      </div>
+    `;
+    return card;
+  };
+
+  const fetchMorePosts = async (
+    cursor: string | null,
+    tag = "",
+    reset = false
+  ) => {
     if (isLoading) return;
     isLoading = true;
-    loadingIndicator?.classList.remove("hidden");
+
+    // If resetting, we already showed skeletons in the event listener
+    // If not resetting (pagination), we show the loading indicator at the bottom
+    if (!reset) {
+      loadingIndicator?.classList.remove("hidden");
+    }
 
     try {
       const query = `
-        query Publication($host: String!, $after: String) {
+        query Publication($host: String!, $after: String, $tagSlugs: [String!]) {
           publication(host: $host) {
-            posts(first: 6, after: $after) {
+            posts(first: 6, after: $after, filter: { tagSlugs: $tagSlugs }) {
               pageInfo {
                 hasNextPage
                 endCursor
@@ -130,11 +170,16 @@ const remainingPosts = posts.slice(1);
         }
       `;
 
-      // We need to access the env variable. In client-side scripts, we can't access import.meta.env.HASHNODE_HOST directly if it's not prefixed with PUBLIC_
-      // However, we can pass it from the server-side script via a data attribute or similar.
-      // For now, I'll hardcode the fallback or try to read it if available.
-      // Better approach: Pass the host in a data attribute on the section or sentinel.
-      const host = "davidvictoria.hashnode.dev"; // Fallback or needs to be passed
+      const host = "davidvictoria.hashnode.dev";
+      const variables: any = {
+        host,
+        after: cursor,
+      };
+
+      // Only apply tag filter if it's not "general" (which means untagged) and not empty (which means all)
+      if (tag && tag !== "general") {
+        variables.tagSlugs = [tag];
+      }
 
       const response = await fetch("https://gql.hashnode.com", {
         method: "POST",
@@ -143,10 +188,7 @@ const remainingPosts = posts.slice(1);
         },
         body: JSON.stringify({
           query,
-          variables: {
-            host,
-            after: cursor,
-          },
+          variables,
         }),
       });
 
@@ -156,23 +198,82 @@ const remainingPosts = posts.slice(1);
       );
       const { hasNextPage, endCursor } = data.publication.posts.pageInfo;
 
-      newPosts.forEach((post: any) => {
+      // Filter posts client-side for "general" tag (untagged posts)
+      let filteredPosts = newPosts;
+      if (tag === "general") {
+        filteredPosts = newPosts.filter(
+          (post: any) => !post.tags || post.tags.length === 0
+        );
+      }
+
+      if (reset && postsGrid) {
+        postsGrid.innerHTML = "";
+      }
+
+      filteredPosts.forEach((post: any) => {
         const card = createPostCard(post);
         postsGrid?.appendChild(card);
       });
 
-      if (hasNextPage && sentinel) {
-        sentinel.setAttribute("data-cursor", endCursor);
-      } else if (sentinel) {
-        sentinel.remove();
+      if (sentinel) {
+        if (hasNextPage) {
+          sentinel.setAttribute("data-cursor", endCursor);
+          sentinel.style.display = "block";
+        } else {
+          sentinel.removeAttribute("data-cursor");
+          sentinel.style.display = "none";
+        }
+      }
+
+      // If we filtered out all posts but there are more pages, fetch next page immediately
+      if (
+        tag === "general" &&
+        filteredPosts.length === 0 &&
+        hasNextPage &&
+        endCursor
+      ) {
+        isLoading = false; // Reset loading state for recursive call
+        await fetchMorePosts(endCursor, tag, false);
+        return; // Return to avoid setting isLoading = false again in finally
       }
     } catch (error) {
       console.error("Error fetching more posts:", error);
     } finally {
-      isLoading = false;
-      loadingIndicator?.classList.add("hidden");
+      // Only set isLoading to false if we didn't recurse
+      if (isLoading) {
+        isLoading = false;
+        loadingIndicator?.classList.add("hidden");
+      }
     }
   };
+
+  document.addEventListener("filter-change", ((e: CustomEvent) => {
+    const { tag } = e.detail;
+    currentTag = tag;
+
+    // Toggle featured post visibility
+    if (featuredPostContainer) {
+      if (tag) {
+        featuredPostContainer.style.display = "none";
+      } else {
+        featuredPostContainer.style.display = "block";
+      }
+    }
+
+    // Clear grid immediately and show skeletons
+    if (postsGrid) {
+      postsGrid.innerHTML = "";
+      for (let i = 0; i < 6; i++) {
+        postsGrid.appendChild(createSkeletonCard());
+      }
+    }
+
+    // Hide loading indicator (we use skeletons for reset)
+    loadingIndicator?.classList.add("hidden");
+
+    // Reset and fetch
+    fetchMorePosts(null, currentTag, true);
+  }) as EventListener);
 
   if (sentinel) {
     const observer = new IntersectionObserver(
@@ -181,7 +282,7 @@ const remainingPosts = posts.slice(1);
           if (entry.isIntersecting) {
             const cursor = sentinel.getAttribute("data-cursor");
             if (cursor) {
-              fetchMorePosts(cursor);
+              fetchMorePosts(cursor, currentTag);
             }
           }
         });

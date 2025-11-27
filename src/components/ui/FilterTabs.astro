@@ -19,10 +19,13 @@ const baseClasses =
   <div
     class="rounded-2xl p-2 border border-white/5 bg-white/1 backdrop-blur-2xl flex flex-wrap justify-center gap-2 max-w-[95vw]"
   >
-    <button class:list={[baseClasses, activeClasses]}>Todos</button>
-    <button class:list={[baseClasses, inactiveClasses]}>General</button>
-    <button class:list={[baseClasses, inactiveClasses]}>Programación</button>
-    <button class:list={[baseClasses, inactiveClasses]}>Software</button>
+    <button class:list={[baseClasses, activeClasses]} data-tag="">Todos</button>
+    <button class:list={[baseClasses, inactiveClasses]} data-tag="general"
+      >General</button
+    >
+    <button class:list={[baseClasses, inactiveClasses]} data-tag="software"
+      >Software</button
+    >
   </div>
 </div>
 
@@ -40,6 +43,14 @@ const baseClasses =
       // Add active classes to clicked button and remove inactive classes
       button.classList.remove(...inactiveClasses);
       button.classList.add(...activeClasses);
+
+      // Dispatch event with selected tag
+      const tag = button.getAttribute("data-tag");
+      const event = new CustomEvent("filter-change", {
+        detail: { tag },
+        bubbles: true,
+      });
+      button.dispatchEvent(event);
     });
   });
 </script>

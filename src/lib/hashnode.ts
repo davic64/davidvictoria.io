@@ -25,11 +25,11 @@ export interface PageInfo {
   endCursor: string;
 }
 
-export async function getPosts(after?: string) {
+export async function getPosts(after?: string, tag?: string) {
   const query = `
-    query Publication($host: String!, $after: String) {
+    query Publication($host: String!, $after: String, $tagSlugs: [String!]) {
       publication(host: $host) {
-        posts(first: 10, after: $after) {
+        posts(first: 10, after: $after, filter: { tagSlugs: $tagSlugs }) {
           pageInfo {
             hasNextPage
             endCursor
@@ -62,6 +62,15 @@ export async function getPosts(after?: string) {
     }
   `;
 
+  const variables: any = {
+    host: import.meta.env.HASHNODE_HOST || "davidvictoria.hashnode.dev",
+    after,
+  };
+
+  if (tag) {
+    variables.tagSlugs = [tag];
+  }
+
   const response = await fetch("https://gql.hashnode.com", {
     method: "POST",
     headers: {
@@ -69,10 +78,7 @@ export async function getPosts(after?: string) {
     },
     body: JSON.stringify({
       query,
-      variables: {
-        host: import.meta.env.HASHNODE_HOST || "davidvictoria.hashnode.dev",
-        after,
-      },
+      variables,
     }),
   });
 
