@@ -204,6 +204,11 @@ const remainingPosts = posts.slice(1);
         filteredPosts = newPosts.filter(
           (post: any) => !post.tags || post.tags.length === 0
         );
+      } else if (!tag && reset && filteredPosts.length > 0) {
+        // If we are in "Todos" (no tag) and resetting (first page),
+        // the first post is already shown in the featured section.
+        // Remove it to avoid duplication.
+        filteredPosts.shift();
       }
 
       if (reset && postsGrid) {

@@ -9,3 +9,16 @@
 @theme "dark" {
   --color-card: #0f1115;
 }
+
+html,
+body {
+  height: 100%;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
