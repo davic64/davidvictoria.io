@@ -2,6 +2,8 @@
 import GlowBackground from "../components/ui/GlowBackground.astro";
 import Navbar from "../components/ui/Navbar.astro";
 import Footer from "../components/ui/Footer.astro";
+import Analytics from "@vercel/analytics/astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
 import "../styles/global.css";
 ---
 
@@ -15,6 +17,8 @@ import "../styles/global.css";
     <title>David Victoria</title>
   </head>
   <body>
+    <Analytics />
+    <SpeedInsights />
     <GlowBackground />
     <Navbar />
     <div class="max-w-7xl mx-auto px-8 flex-1 w-full">
