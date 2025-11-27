@@ -2,17 +2,193 @@
 import FilterTabs from "./ui/FilterTabs.astro";
 import FeaturedPost from "./ui/FeaturedPost.astro";
 import PostCard from "./ui/PostCard.astro";
+import { getPosts, type Post } from "../lib/hashnode";
+
+const { posts, pageInfo } = await getPosts();
+const featuredPost = posts[0];
+const remainingPosts = posts.slice(1);
 ---
 
 <section class="space-y-20 pb-20">
   <FilterTabs />
-  <FeaturedPost />
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <PostCard />
-    <PostCard />
-    <PostCard />
-    <PostCard />
-    <PostCard />
-    <PostCard />
+
+  {featuredPost && <FeaturedPost post={featuredPost} />}
+
+  <div
+    id="posts-grid"
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+  >
+    {remainingPosts.map((post: Post) => <PostCard post={post} />)}
+  </div>
+
+  {
+    pageInfo.hasNextPage && (
+      <div id="sentinel" data-cursor={pageInfo.endCursor} class="h-10 w-full" />
+    )
+  }
+  <div
+    id="loading-indicator"
+    class="hidden w-full text-center py-8 text-gray-500"
+  >
+    Cargando más posts...
   </div>
 </section>
+
+<script>
+  const sentinel = document.getElementById("sentinel");
+  const postsGrid = document.getElementById("posts-grid");
+  const loadingIndicator = document.getElementById("loading-indicator");
+
+  let isLoading = false;
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  const createPostCard = (post: any) => {
+    const card = document.createElement("a");
+    card.href = `/post/${post.slug}`;
+    card.className =
+      "group relative bg-card hover:bg-card/80 border border-white/5 hover:border-white/10 transition-all duration-300 rounded-2xl overflow-hidden cursor-pointer flex flex-col h-full";
+
+    const tagsHtml =
+      post.tags && post.tags.length > 0
+        ? `<div class="absolute top-4 left-4 z-10 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-white/10 text-white backdrop-blur-md border-white/10">${post.tags[0].name}</div>`
+        : `<div class="absolute top-4 left-4 z-10 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-white/10 text-white backdrop-blur-md border-white/10">General</div>`;
+
+    card.innerHTML = `
+      <div class="relative h-49 overflow-hidden">
+        ${tagsHtml}
+        <img
+          src="${post.coverImage.url}"
+          alt="${post.title}"
+          class="w-full h-full object-cover transform group-hover:scale-105 duration-700 opacity-80 group-hover:opacity-100 transition-all"
+        />
+      </div>
+      <div class="p-6 flex-1 flex flex-col">
+        <h3 class="text-lg font-semibold leading-snug text-white">${post.title}</h3>
+        <p class="text-sm text-gray-500 line-clamp-3 leading-relaxed mt-2">
+          ${post.brief}
+        </p>
+        <div class="flex items-center justify-between pt-4 mt-4 text-xs text-gray-500 border-t border-white/5">
+          <div class="flex items-center gap-2">
+             <div class="w-6 h-6 rounded-full overflow-hidden">
+                <img src="${post.author.profilePicture}" alt="${post.author.name}" class="w-full h-full object-cover" />
+             </div>
+            <span>${post.author.name}</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <span>${formatDate(post.publishedAt)}</span>
+            <span>${post.readTimeInMinutes} min</span>
+          </div>
+        </div>
+      </div>
+    `;
+    return card;
+  };
+
+  const fetchMorePosts = async (cursor: string) => {
+    if (isLoading) return;
+    isLoading = true;
+    loadingIndicator?.classList.remove("hidden");
+
+    try {
+      const query = `
+        query Publication($host: String!, $after: String) {
+          publication(host: $host) {
+            posts(first: 6, after: $after) {
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
+              edges {
+                node {
+                  title
+                  brief
+                  slug
+                  coverImage {
+                    url
+                  }
+                  publishedAt
+                  readTimeInMinutes
+                  author {
+                    name
+                    profilePicture
+                  }
+                  tags {
+                    name
+                    slug
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      // We need to access the env variable. In client-side scripts, we can't access import.meta.env.HASHNODE_HOST directly if it's not prefixed with PUBLIC_
+      // However, we can pass it from the server-side script via a data attribute or similar.
+      // For now, I'll hardcode the fallback or try to read it if available.
+      // Better approach: Pass the host in a data attribute on the section or sentinel.
+      const host = "davidvictoria.hashnode.dev"; // Fallback or needs to be passed
+
+      const response = await fetch("https://gql.hashnode.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query,
+          variables: {
+            host,
+            after: cursor,
+          },
+        }),
+      });
+
+      const { data } = await response.json();
+      const newPosts = data.publication.posts.edges.map(
+        (edge: any) => edge.node
+      );
+      const { hasNextPage, endCursor } = data.publication.posts.pageInfo;
+
+      newPosts.forEach((post: any) => {
+        const card = createPostCard(post);
+        postsGrid?.appendChild(card);
+      });
+
+      if (hasNextPage && sentinel) {
+        sentinel.setAttribute("data-cursor", endCursor);
+      } else if (sentinel) {
+        sentinel.remove();
+      }
+    } catch (error) {
+      console.error("Error fetching more posts:", error);
+    } finally {
+      isLoading = false;
+      loadingIndicator?.classList.add("hidden");
+    }
+  };
+
+  if (sentinel) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const cursor = sentinel.getAttribute("data-cursor");
+            if (cursor) {
+              fetchMorePosts(cursor);
+            }
+          }
+        });
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(sentinel);
+  }
+</script>

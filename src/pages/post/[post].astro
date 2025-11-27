@@ -2,25 +2,31 @@
 import { ArrowLeft, Calendar, Clock } from "@lucide/astro";
 import Layout from "../../layouts/Layout.astro";
 import Avatar from "../../components/ui/Avatar.astro";
-import { Image } from "astro:assets";
 import Badge from "../../components/ui/Badge.astro";
+import { getPosts, type Post } from "../../lib/hashnode";
 
-export function getStaticPaths() {
-  const posts = [
-    {
-      slug: "hello-world",
-      title: "Hello World",
-      content: "This is the first post. Welcome to my new blog!",
-    },
-  ];
+export async function getStaticPaths() {
+  const { posts } = await getPosts();
 
-  return posts.map((post) => ({
+  return posts.map((post: Post) => ({
     params: { post: post.slug },
     props: { post },
   }));
 }
 
+interface Props {
+  post: Post;
+}
+
 const { post } = Astro.props;
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 ---
 
 <Layout>
@@ -42,46 +48,56 @@ const { post } = Astro.props;
       </div>
     </div>
     <article class="px-4 space-y-6">
-      <Badge
-        text="General"
-        class="inline-block"
-        variant="outline"
-        color="primary"
-      />
+      {
+        post.tags && post.tags.length > 0 ? (
+          <Badge
+            text={post.tags[0].name}
+            class="inline-block"
+            variant="outline"
+            color="primary"
+          />
+        ) : (
+          <Badge
+            text="General"
+            class="inline-block"
+            variant="outline"
+            color="primary"
+          />
+        )
+      }
       <h1 class="text-4xl md:text-6xl font-bold text-white tracking-tight">
         {post.title}
       </h1>
       <div class="flex items-center gap-4 border-b border-white/5 pb-8 mb-8">
         <div class="flex items-center gap-2">
-          <Avatar size="sm" />
-          <span class="text-sm">David Victoria</span>
+          <Avatar
+            size="sm"
+            src={post.author.profilePicture}
+            alt={post.author.name}
+          />
+          <span class="text-sm">{post.author.name}</span>
         </div>
         <div class="hidden md:block w-px h-8 bg-white/5"></div>
         <div class="flex items-center gap-4 text-gray-500 text-xs">
           <div class="flex items-center gap-2">
             <Calendar size={14} />
-            <span>24-11-2025</span>
+            <span>{formatDate(post.publishedAt)}</span>
           </div>
           <div class="flex items-center gap-2">
             <Clock size={14} />
-            <span>6 min</span>
+            <span>{post.readTimeInMinutes} min</span>
           </div>
         </div>
       </div>
-      <Image
-        src="https://images.unsplash.com/photo-1763827657709-b1bbc3c4945b?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        alt="Post"
+      <img
+        src={post.coverImage.url}
+        alt={post.title}
         class="w-full h-96 object-cover rounded-lg"
-        width={1200}
-        height={600}
-        loading="lazy"
-        fit="inside"
-        quality={80}
-        priority
       />
-      <div class="mt-8">
-        <p>{post.content}</p>
-      </div>
+      <div
+        class="mt-8 prose prose-invert max-w-none"
+        set:html={post.content.html}
+      />
     </article>
-  </div></Layout
->
+  </div>
+</Layout>

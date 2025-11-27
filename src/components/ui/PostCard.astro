@@ -1,36 +1,61 @@
 ---
 import Avatar from "./Avatar.astro";
 import Badge from "./Badge.astro";
+import type { Post } from "../../lib/hashnode";
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 ---
 
-<div
+<a
+  href={`/post/${post.slug}`}
   class="group relative bg-card hover:bg-card/80 border border-white/5 hover:border-white/10 transition-all duration-300 rounded-2xl overflow-hidden cursor-pointer flex flex-col h-full"
 >
   <div class="relative h-49 overflow-hidden">
-    <Badge text="General" class="absolute top-4 left-4 z-10" />
+    {
+      post.tags && post.tags.length > 0 ? (
+        <Badge text={post.tags[0].name} class="absolute top-4 left-4 z-10" />
+      ) : (
+        <Badge text="General" class="absolute top-4 left-4 z-10" />
+      )
+    }
     <img
-      src="https://images.unsplash.com/photo-1763827657709-b1bbc3c4945b?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-      alt="imagen"
+      src={post.coverImage.url}
+      alt={post.title}
       class="w-full h-full object-cover transform group-hover:scale-105 duration-700 opacity-80 group-hover:opacity-100 transition-all"
     />
   </div>
   <div class="p-6 flex-1 flex flex-col">
-    <h3 class="text-lg font-semibold leading-snug">Título del Artículo</h3>
+    <h3 class="text-lg font-semibold leading-snug">{post.title}</h3>
     <p class="text-sm text-gray-500 line-clamp-3 leading-relaxed">
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Lorem ipsum dolor
-      sit amet consectetur adipisicing elit.
+      {post.brief}
     </p>
     <div
       class="flex items-center justify-between pt-4 mt-4 text-xs text-gray-500 border-t border-white/5"
     >
       <div class="flex items-center gap-2">
-        <Avatar size="xs" />
-        <span>David Victoria</span>
+        <Avatar
+          size="xs"
+          src={post.author.profilePicture}
+          alt={post.author.name}
+        />
+        <span>{post.author.name}</span>
       </div>
       <div class="flex items-center gap-4">
-        <span>20-11-2025</span>
-        <span>3 min</span>
+        <span>{formatDate(post.publishedAt)}</span>
+        <span>{post.readTimeInMinutes} min</span>
       </div>
     </div>
   </div>
-</div>
+</a>

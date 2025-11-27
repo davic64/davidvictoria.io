@@ -2,9 +2,25 @@
 import { CalendarIcon, ChevronRightIcon, ClockIcon } from "@lucide/astro";
 import Avatar from "./Avatar.astro";
 import Badge from "./Badge.astro";
+import type { Post } from "../../lib/hashnode";
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 ---
 
-<div
+<a
+  href={`/post/${post.slug}`}
   class="group relative w-full bg-card border border-white/5 hover:border-white/10 rounded-3xl overflow-hidden transition-all duration-500 cursor-pointer grid grid-cols-1 md:grid-cols-2 shadow-2xl"
 >
   <div
@@ -14,11 +30,17 @@ import Badge from "./Badge.astro";
   <div class="relative h-64 md:h-full overflow-hidden">
     <div class="flex gap-2 absolute top-4 left-4 z-10">
       <Badge variant="glow" color="primary" text="Nuevo" />
-      <Badge text="General" />
+      {
+        post.tags && post.tags.length > 0 ? (
+          post.tags.slice(0, 2).map((tag) => <Badge text={tag.name} />)
+        ) : (
+          <Badge text="General" />
+        )
+      }
     </div>
     <img
-      src="https://images.unsplash.com/photo-1763827657709-b1bbc3c4945b?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-      alt="imagen"
+      src={post.coverImage.url}
+      alt={post.title}
       class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 ease-out"
     />
   </div>
@@ -26,28 +48,28 @@ import Badge from "./Badge.astro";
     <h2
       class="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-[1.1]"
     >
-      Nombre Artículo
+      {post.title}
     </h2>
     <p
       class="text-gray-400 text-base md:text-lg mb-8 line-clamp-3 md:line-clamp-4 leading-relaxed"
     >
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae eius
-      officia numquam vero quisquam! Lorem ipsum dolor sit amet consectetur
-      adipisicing elit. Molestiae eius officia numquam vero quisquam!
+      {post.brief}
     </p>
     <div
       class="flex flex-wrap items-center justify-between gap-4 border-t border-white/5 pt-6"
     >
       <div class="flex items-center gap-4">
-        <Avatar />
+        <Avatar src={post.author.profilePicture} alt={post.author.name} />
         <div class="flex flex-col gap-1">
-          <p class="text-sm font-medium">David Victoria</p>
+          <p class="text-sm font-medium">{post.author.name}</p>
           <div class="flex items-center gap-3 text-xs text-gray-500">
             <span class="flex items-center gap-1">
-              <CalendarIcon size={12} /> 25-11-2025
+              <CalendarIcon size={12} />
+              {formatDate(post.publishedAt)}
             </span>
             <span class="flex items-center gap-1">
-              <ClockIcon size={12} /> 5 min
+              <ClockIcon size={12} />
+              {post.readTimeInMinutes} min
             </span>
           </div>
         </div>
@@ -59,4 +81,4 @@ import Badge from "./Badge.astro";
       </div>
     </div>
   </div>
-</div>
+</a>

@@ -1,12 +1,11 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
   color-scheme: dark;
-  --color-card: #0F1115;
+  --color-card: #0f1115;
 }
 
 @theme "dark" {
-  --color-card: #0F1115;
+  --color-card: #0f1115;
 }
-
-
