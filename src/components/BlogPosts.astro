@@ -143,9 +143,9 @@ const remainingPosts = posts.slice(1);
 
     try {
       const query = `
-        query Publication($host: String!, $after: String, $tagSlugs: [String!]) {
+        query Publication($host: String!, $first: Int!, $after: String, $tagSlugs: [String!]) {
           publication(host: $host) {
-            posts(first: 6, after: $after, filter: { tagSlugs: $tagSlugs }) {
+            posts(first: $first, after: $after, filter: { tagSlugs: $tagSlugs }) {
               pageInfo {
                 hasNextPage
                 endCursor
@@ -178,6 +178,7 @@ const remainingPosts = posts.slice(1);
       const host = "davidvictoria.hashnode.dev";
       const variables: any = {
         host,
+        first: tag === "general" ? 20 : 6,
         after: cursor,
       };
 
@@ -236,10 +237,11 @@ const remainingPosts = posts.slice(1);
         }
       }
 
-      // If we filtered out all posts but there are more pages, fetch next page immediately
+      // If we filtered out posts (or found very few) but there are more pages, fetch next page immediately
+      // This ensures we try to fill the grid for "general" tag which uses client-side filtering
       if (
         tag === "general" &&
-        filteredPosts.length === 0 &&
+        filteredPosts.length < 6 &&
         hasNextPage &&
         endCursor
       ) {
